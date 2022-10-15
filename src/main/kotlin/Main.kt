@@ -30,7 +30,7 @@ fun main(args: Array<String>) {
         val creator = fanboxInteractor.getCreator()
         val paginates = fanboxInteractor.getCreatorPaginates()
 
-        if(creator == null) {
+        if (creator == null) {
             println("存在しないクリエイターです [${arguments["creator_id"]!!}]")
             return@runBlocking
         }
@@ -114,8 +114,7 @@ fun main(args: Array<String>) {
                     DownloadItem(
                         url = file.url,
                         path = fileFile.absolutePath,
-                        type = FileType.File,
-                        isSuccess = fanboxInteractor.downloadItem(file.url, fileFile)
+                        type = FileType.File, isSuccess = fanboxInteractor.downloadItem(file.url, fileFile)
                     )
                 )
 
@@ -126,7 +125,7 @@ fun main(args: Array<String>) {
             }
         }
 
-        if(downloaded.isEmpty()) println("ダウンロード可能なアイテムがありませんでした")
+        if (downloaded.isEmpty()) println("ダウンロード可能なアイテムがありませんでした")
 
         Console.spaceLine()
 

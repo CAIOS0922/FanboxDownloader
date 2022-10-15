@@ -6,7 +6,6 @@ import io.ktor.http.*
 import io.ktor.util.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
-import repository.entity.PostInfoEntity
 import repository.holder.Creator
 import repository.holder.CreatorItem
 import repository.holder.PostInfo

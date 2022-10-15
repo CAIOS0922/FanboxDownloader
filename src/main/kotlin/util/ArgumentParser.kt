@@ -60,20 +60,20 @@ class ArgumentParser(
         val remainArguments = originalArguments.toMutableList()
         val parsedMap = mutableMapOf<String, String>()
 
-        if(remainArguments.isEmpty()) {
+        if (remainArguments.isEmpty()) {
             help()
             exitProcess(0)
         }
 
-        for(argument in arguments) {
-            if(argument.isRequire && remainArguments.firstOrNull() == null) {
+        for (argument in arguments) {
+            if (argument.isRequire && remainArguments.firstOrNull() == null) {
                 println("Argument [${argument.name}] must be specified.")
                 exitProcess(-1)
             }
 
-            if(remainArguments.firstOrNull() == null) continue
+            if (remainArguments.firstOrNull() == null) continue
 
-            if(isArgNameMatch(remainArguments.first(), argument.name, argument.longName)) {
+            if (isArgNameMatch(remainArguments.first(), argument.name, argument.longName)) {
                 if(argument.longName == "--help") {
                     help()
                     exitProcess(0)

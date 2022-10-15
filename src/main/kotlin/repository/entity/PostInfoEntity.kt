@@ -11,55 +11,32 @@ data class PostInfoEntity(
 ) {
     @Serializable
     data class Body(
-        @SerialName("body")
-        val body: Body?,
-        @SerialName("commentCount")
-        val commentCount: Int,
-        @SerialName("commentList")
-        val commentList: CommentList,
-        @SerialName("creatorId")
-        val creatorId: String,
-        @SerialName("excerpt")
-        val excerpt: String,
-        @SerialName("feeRequired")
-        val feeRequired: Int,
-        @SerialName("hasAdultContent")
-        val hasAdultContent: Boolean,
-        @SerialName("id")
-        val id: String,
-        @SerialName("imageForShare")
-        val imageForShare: String,
-        @SerialName("isLiked")
-        val isLiked: Boolean,
-        @SerialName("isRestricted")
-        val isRestricted: Boolean,
-        @SerialName("likeCount")
-        val likeCount: Int,
-        @SerialName("nextPost")
-        val nextPost: NextPost?,
-        @SerialName("prevPost")
-        val prevPost: NextPost?,
-        @SerialName("publishedDatetime")
-        val publishedDatetime: String,
-        @SerialName("tags")
-        val tags: List<String>,
-        @SerialName("title")
-        val title: String,
-        @SerialName("type")
-        val type: String,
-        @SerialName("updatedDatetime")
-        val updatedDatetime: String,
-        @SerialName("user")
-        val user: User
+        @SerialName("body") val body: Body?,
+        @SerialName("commentCount") val commentCount: Int,
+        @SerialName("commentList") val commentList: CommentList,
+        @SerialName("creatorId") val creatorId: String,
+        @SerialName("excerpt") val excerpt: String,
+        @SerialName("feeRequired") val feeRequired: Int,
+        @SerialName("hasAdultContent") val hasAdultContent: Boolean,
+        @SerialName("id") val id: String,
+        @SerialName("imageForShare") val imageForShare: String,
+        @SerialName("isLiked") val isLiked: Boolean,
+        @SerialName("isRestricted") val isRestricted: Boolean,
+        @SerialName("likeCount") val likeCount: Int,
+        @SerialName("nextPost") val nextPost: NextPost?,
+        @SerialName("prevPost") val prevPost: NextPost?,
+        @SerialName("publishedDatetime") val publishedDatetime: String,
+        @SerialName("tags") val tags: List<String>,
+        @SerialName("title") val title: String,
+        @SerialName("type") val type: String,
+        @SerialName("updatedDatetime") val updatedDatetime: String,
+        @SerialName("user") val user: User,
     ) {
         @Serializable
         data class Body(
-            @SerialName("fileMap")
-            val fileMap: Map<String, File> = emptyMap(),
-            @SerialName("imageMap")
-            val imageMap: Map<String, Image> = emptyMap(),
-            @SerialName("images")
-            val images: List<Image> = emptyList(),
+            @SerialName("fileMap") val fileMap: Map<String, File> = emptyMap(),
+            @SerialName("imageMap") val imageMap: Map<String, Image> = emptyMap(),
+            @SerialName("images") val images: List<Image> = emptyList(),
         ) {
             @Serializable
             data class File(
