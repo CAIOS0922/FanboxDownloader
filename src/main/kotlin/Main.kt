@@ -16,7 +16,7 @@ fun main(args: Array<String>) {
     val argumentParser = ArgumentParser(args, "PixivFanboxからデータを一括でダウンロードするプログラムです").apply {
         addSingleArgument("-p", "--pack-items", help = "ディレクトリを分けずに保存します")
         addSingleArgument("-t", "--sort-by-time", help = "ディレクトリ名を公開日にします")
-        addValueArgument("-s", "--session-id", valueName = "SESSION ID", help = "FANBOXSESSID（FANBOXのセッションID）")
+        addValueArgument("-s", "--session-id", valueName = "SESSION ID", help = "FANBOXのセッションID（FANBOXSESSID）")
         addValueArgument("creator_id", valueName = "CREATOR-ID", help = "クリエイターID", isRequire = true)
     }
 

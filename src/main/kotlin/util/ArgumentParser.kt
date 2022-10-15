@@ -1,6 +1,5 @@
 package util
 
-import kotlin.reflect.KClass
 import kotlin.system.exitProcess
 
 class ArgumentParser(
@@ -13,17 +12,17 @@ class ArgumentParser(
         addSingleArgument(
             name = "-h",
             longName = "--help",
-            help = "show this help message"
+            help = "このヘルプを表示します"
         )
     }
 
-    fun addValueArgument (
+    fun addValueArgument(
         name: String,
-        longName: String = name,
+        longName: String? = null,
         valueName: String,
         help: String,
         defaultValue: String? = null,
-        isRequire: Boolean = false
+        isRequire: Boolean = false,
     ) {
         arguments.add(
             Argument(
@@ -38,11 +37,11 @@ class ArgumentParser(
         )
     }
 
-    fun addSingleArgument (
+    fun addSingleArgument(
         name: String,
-        longName: String = name,
+        longName: String? = null,
         help: String,
-        isRequired: Boolean = false
+        isRequired: Boolean = false,
     ) {
         arguments.add(
             Argument(
@@ -110,43 +109,50 @@ class ArgumentParser(
             }
         }
 
-        println()
+        println("\n")
         println(description)
-        println()
 
+        println()
         println("Require arguments:")
 
-        for (argument in arguments.filter { it.isRequire }) {
-            if(argument.hasValue) {
-                println("\t${argument.name} ${argument.valueName}, ${argument.longName} ${argument.valueName}\t${argument.help}")
-            } else {
-                println("\t${argument.name} ${argument.valueName}\t\t${argument.help}")
-            }
+        val requireHelpTexts = arguments.filter { it.isRequire }.map { getHelpText(it) }
+        val requireHelpTextMaxLength = requireHelpTexts.maxBy { it.first.length }.first.length + 4
+
+        for (helps in requireHelpTexts) {
+            println(helps.first + (0 until (requireHelpTextMaxLength - helps.first.length)).joinToString(separator = "") { " " } + helps.second)
         }
 
         println()
-        println("options: ")
+        println("Options: ")
 
-        for (argument in arguments.filter { !it.isRequire }) {
-            if(argument.hasValue) {
-                println("\t${argument.name} ${argument.valueName}, ${argument.longName} ${argument.valueName}\t${argument.help}")
-            } else {
-                println("\t${argument.name} ${argument.valueName}\t\t${argument.help}")
-            }
+        val optionHelpTexts = arguments.filter { !it.isRequire }.map { getHelpText(it) }
+        val optionHelpTextMaxLength = optionHelpTexts.maxBy { it.first.length }.first.length + 4
+
+        for (helps in optionHelpTexts) {
+            println(helps.first + (0 until (optionHelpTextMaxLength - helps.first.length)).joinToString(separator = "") { " " } + helps.second)
         }
     }
 
-    private fun isArgNameMatch(originalName: String, shortName: String, longName: String): Boolean {
-        return (originalName == shortName) || (originalName.lowercase() == longName.lowercase())
+    private fun isArgNameMatch(originalName: String, shortName: String, longName: String?): Boolean {
+        return (originalName == shortName) || (originalName.lowercase() == longName?.lowercase())
+    }
+
+    private fun getHelpText(argument: Argument): Pair<String, String> {
+        return when {
+            argument.hasValue && argument.longName != null  -> "\t${argument.name}, ${argument.longName} ${argument.valueName}"
+            argument.hasValue && argument.longName == null  -> "\t${argument.name} ${argument.valueName}"
+            !argument.hasValue && argument.longName != null -> "\t${argument.name}, ${argument.longName}"
+            else                                            -> "\t${argument.name}}"
+        } to argument.help
     }
 
     private data class Argument(
         val name: String,
-        val longName: String,
+        val longName: String?,
         val valueName: String,
         val help: String,
         val hasValue: Boolean,
         val defaultValue: String?,
-        val isRequire: Boolean
+        val isRequire: Boolean,
     )
 }
