@@ -89,12 +89,16 @@ class FanboxInteractor(
 
     @OptIn(InternalAPI::class)
     override suspend fun downloadItem(url: String, file: File): Boolean {
-        val response = apiClient.download(url)
+        return try {
+            val response = apiClient.download(url)
 
-        return if(response.status.isSuccess()) {
-            response.content.copyAndClose(file.writeChannel())
-            true
-        } else {
+            if (response.status.isSuccess()) {
+                response.content.copyAndClose(file.writeChannel())
+                true
+            } else {
+                false
+            }
+        } catch (e: Throwable) {
             false
         }
     }

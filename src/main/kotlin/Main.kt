@@ -1,19 +1,20 @@
 import io.ktor.http.*
 import io.ktor.util.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import repository.FanboxInteractor
 import repository.holder.CreatorItem
+import repository.holder.DownloadItem
 import repository.holder.FileType
 import repository.holder.PostInfo
-import repository.holder.DownloadItem
 import util.ArgumentParser
 import util.Console
 import java.io.File
 
 fun main(args: Array<String>) {
     val argumentParser = ArgumentParser(args, "PixivFanboxからデータを一括でダウンロードするプログラムです").apply {
-        addSingleArgument("-f", "--force-update", help = "以前ダウンロードしたコンテンツを上書きします")
-        addSingleArgument("-p", "--pack-items", help = "ディレクトリ分けせに保存します")
+        addSingleArgument("-p", "--pack-items", help = "ディレクトリを分けずに保存します")
         addSingleArgument("-t", "--sort-by-time", help = "ディレクトリ名を公開日にします")
         addValueArgument("-s", "--session-id", valueName = "SESSION ID", help = "FANBOXSESSID（FANBOXのセッションID）")
         addValueArgument("creator_id", valueName = "CREATOR-ID", help = "クリエイターID", isRequire = true)
@@ -23,7 +24,7 @@ fun main(args: Array<String>) {
     val fanboxInteractor = FanboxInteractor(arguments["creator_id"]!!, arguments["-s"])
 
     val fanboxDir = getDir(getCurrentDir(), "FanboxCollector")
-    val creatorDir = getDir(fanboxDir, arguments["creator_id"]!!)
+    val creatorDir = getDir(fanboxDir, arguments["creator_id"]!!.replace(Regex("""[/\\]"""), "-"))
 
     runBlocking {
         val creator = fanboxInteractor.getCreator()
@@ -48,7 +49,7 @@ fun main(args: Array<String>) {
             Console.clearLine()
             Console.printProgress(paginates.size - 1, index)
 
-            print("[${creatorItems.size}件 取得済み]")
+            print("[${creatorItems.size}件]")
         }
 
         Console.spaceLine()
@@ -62,9 +63,7 @@ fun main(args: Array<String>) {
             Console.clearLine()
             Console.printProgress(creatorItems.size - 1, index)
 
-            print("[${postInfoItems.size}件 取得済み]")
-
-            delay(50)
+            print("[${postInfoItems.size}件]")
         }
 
         Console.spaceLine()
@@ -73,46 +72,61 @@ fun main(args: Array<String>) {
 
         val maxItems = postInfoItems.sumOf { it.images.size + it.files.size }
         val startTime = System.currentTimeMillis()
-        var downloadedCount = 0
 
         for (item in postInfoItems) {
             fun getItemFile(extension: String, index: Int): File {
-                val name = "${item.title}${if(index == 0) "" else "-$index"}.${extension}"
+                val title = item.title.replace(Regex("""[/\\]"""), "-")
+                val name = "${title}${if (index == 0) "" else "-$index"}.${extension}"
                 return when {
                     arguments.containsKey("-p") -> File(creatorDir, name)
                     arguments.containsKey("-t") -> File(getDir(creatorDir, item.publishedTime), name)
-                    else                       -> File(getDir(creatorDir, item.title), name)
+                    else                        -> File(getDir(creatorDir, title), name)
                 }
             }
 
             for ((n, image) in item.images.withIndex()) {
                 val imageFile = getItemFile(image.extension, n)
-                downloaded.add(DownloadItem(imageFile.absolutePath, FileType.Image, fanboxInteractor.downloadItem(image.originalUrl, imageFile)))
+
+                downloaded.add(
+                    DownloadItem(
+                        url = image.originalUrl,
+                        path = imageFile.absolutePath,
+                        type = FileType.Image,
+                        isSuccess = fanboxInteractor.downloadItem(image.originalUrl, imageFile)
+                    )
+                )
 
                 Console.clearLine()
-                Console.printProgress(maxItems - 1, downloadedCount, startTime = startTime, hasETA = true)
+                Console.printProgress(maxItems - 1, downloaded.size, startTime = startTime, hasETA = true)
 
-                print("[${downloadedCount}件 取得済み]")
-
-                downloadedCount++
-                delay(50)
+                print("[${downloaded.size}件, Images: ${downloaded.count { it.type == FileType.Image }}, Files: ${downloaded.count { it.type == FileType.File }}, Errors: ${downloaded.count { !it.isSuccess }}]")
             }
 
             for ((n, file) in item.files.withIndex()) {
                 val fileFile = getItemFile(file.extension, n)
-                downloaded.add(DownloadItem(fileFile.absolutePath, FileType.File, fanboxInteractor.downloadItem(file.url, fileFile)))
+
+                downloaded.add(
+                    DownloadItem(
+                        url = file.url,
+                        path = fileFile.absolutePath,
+                        type = FileType.File,
+                        isSuccess = fanboxInteractor.downloadItem(file.url, fileFile)
+                    )
+                )
 
                 Console.clearLine()
-                Console.printProgress(maxItems - 1, downloadedCount, startTime = startTime, hasETA = true)
+                Console.printProgress(maxItems - 1, downloaded.size, startTime = startTime, hasETA = true)
 
-                print("[${downloadedCount}件 取得済み]")
-
-                downloadedCount++
-                delay(50)
+                print("[${downloaded.size}件, Images: ${downloaded.count { it.type == FileType.Image }}, Files: ${downloaded.count { it.type == FileType.File }}, Errors: ${downloaded.count { !it.isSuccess }}]")
             }
         }
 
         Console.spaceLine()
+
+        val serializer = ListSerializer(DownloadItem.serializer())
+        val json = Json.encodeToString(serializer, downloaded)
+
+        File(creatorDir, "result.json").writeText(json)
 
         println("完了 [データ保存先：${creatorDir.absolutePath}]")
     }

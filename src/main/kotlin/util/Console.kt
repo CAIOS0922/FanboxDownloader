@@ -38,7 +38,7 @@ object Console {
 
     private fun calculateETA(startTime: Long, percentage: Double): String {
         val time = System.currentTimeMillis() - startTime
-        val allTime = ((1 / percentage) * time).toLong()
+        val allTime = ((1 / percentage) * time * (1 - percentage)).toLong()
         return allTime.toTime()
     }
 
