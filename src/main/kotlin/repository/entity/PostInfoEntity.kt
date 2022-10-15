@@ -12,7 +12,7 @@ data class PostInfoEntity(
     @Serializable
     data class Body(
         @SerialName("body")
-        val body: Body,
+        val body: Body?,
         @SerialName("commentCount")
         val commentCount: Int,
         @SerialName("commentList")
@@ -58,6 +58,8 @@ data class PostInfoEntity(
             val fileMap: Map<String, File> = emptyMap(),
             @SerialName("imageMap")
             val imageMap: Map<String, Image> = emptyMap(),
+            @SerialName("images")
+            val images: List<Image> = emptyList(),
         ) {
             @Serializable
             data class File(

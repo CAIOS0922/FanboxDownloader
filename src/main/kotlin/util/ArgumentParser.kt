@@ -60,6 +60,11 @@ class ArgumentParser(
         val remainArguments = originalArguments.toMutableList()
         val parsedMap = mutableMapOf<String, String>()
 
+        if(remainArguments.isEmpty()) {
+            help()
+            exitProcess(0)
+        }
+
         for(argument in arguments) {
             if(argument.isRequire && remainArguments.firstOrNull() == null) {
                 println("Argument [${argument.name}] must be specified.")

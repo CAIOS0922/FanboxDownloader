@@ -6,6 +6,7 @@ import io.ktor.http.*
 import io.ktor.util.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
+import repository.entity.PostInfoEntity
 import repository.holder.Creator
 import repository.holder.CreatorItem
 import repository.holder.PostInfo
@@ -59,15 +60,15 @@ class FanboxInteractor(
             feeRequired = entity.body.feeRequired,
             publishedTime = entity.body.publishedDatetime,
             updatedTime = entity.body.updatedDatetime,
-            images = entity.body.body.imageMap.map { map ->
+            images = ((entity.body.body?.imageMap?.map { it.value } ?: emptyList()) + (entity.body.body?.images ?: emptyList())).map { map ->
                 PostInfo.Image(
-                    id = map.value.id,
-                    extension = map.value.extension,
-                    originalUrl = map.value.originalUrl,
-                    thumbnailUrl = map.value.thumbnailUrl,
+                    id = map.id,
+                    extension = map.extension,
+                    originalUrl = map.originalUrl,
+                    thumbnailUrl = map.thumbnailUrl,
                 )
             },
-            files = entity.body.body.fileMap.map { map ->
+            files = entity.body.body?.fileMap?.map { map ->
                 PostInfo.File(
                     id = map.value.id,
                     name = map.value.name,
@@ -75,7 +76,7 @@ class FanboxInteractor(
                     size = map.value.size,
                     url = map.value.url,
                 )
-            },
+            } ?: emptyList(),
             tags = entity.body.tags,
             excerpt = entity.body.excerpt,
             isLicked = entity.body.isLiked,

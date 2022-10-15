@@ -16,7 +16,7 @@ fun main(args: Array<String>) {
     val argumentParser = ArgumentParser(args, "PixivFanboxからデータを一括でダウンロードするプログラムです").apply {
         addSingleArgument("-p", "--pack-items", help = "ディレクトリを分けずに保存します")
         addSingleArgument("-t", "--sort-by-time", help = "ディレクトリ名を公開日にします")
-        addValueArgument("-s", "--session-id", valueName = "SESSION ID", help = "FANBOXのセッションID（FANBOXSESSID）")
+        addValueArgument("-s", "--session-id", valueName = "SESSION-ID", help = "FANBOXのセッションID（FANBOXSESSID）")
         addValueArgument("creator_id", valueName = "CREATOR-ID", help = "クリエイターID", isRequire = true)
     }
 
@@ -24,11 +24,16 @@ fun main(args: Array<String>) {
     val fanboxInteractor = FanboxInteractor(arguments["creator_id"]!!, arguments["-s"])
 
     val fanboxDir = getDir(getCurrentDir(), "FanboxCollector")
-    val creatorDir = getDir(fanboxDir, arguments["creator_id"]!!.replace(Regex("""[/\\]"""), "-"))
+    val creatorDir = getDir(fanboxDir, arguments["creator_id"]!!.replace(Regex("""[/\\:*?"|]"""), "-"))
 
     runBlocking {
         val creator = fanboxInteractor.getCreator()
         val paginates = fanboxInteractor.getCreatorPaginates()
+
+        if(creator == null) {
+            println("存在しないクリエイターです [${arguments["creator_id"]!!}]")
+            return@runBlocking
+        }
 
         val creatorItems = mutableListOf<CreatorItem>()
         val postInfoItems = mutableListOf<PostInfo>()
@@ -75,11 +80,11 @@ fun main(args: Array<String>) {
 
         for (item in postInfoItems) {
             fun getItemFile(extension: String, index: Int): File {
-                val title = item.title.replace(Regex("""[/\\]"""), "-")
+                val title = item.title.replace(Regex("""[/\\:*?"|]"""), "-")
                 val name = "${title}${if (index == 0) "" else "-$index"}.${extension}"
                 return when {
                     arguments.containsKey("-p") -> File(creatorDir, name)
-                    arguments.containsKey("-t") -> File(getDir(creatorDir, item.publishedTime), name)
+                    arguments.containsKey("-t") -> File(getDir(creatorDir, item.publishedTime.replace(Regex("""[/\\:*?"|]"""), "-")), name)
                     else                        -> File(getDir(creatorDir, title), name)
                 }
             }
@@ -120,6 +125,8 @@ fun main(args: Array<String>) {
                 print("[${downloaded.size}件, Images: ${downloaded.count { it.type == FileType.Image }}, Files: ${downloaded.count { it.type == FileType.File }}, Errors: ${downloaded.count { !it.isSuccess }}]")
             }
         }
+
+        if(downloaded.isEmpty()) println("ダウンロード可能なアイテムがありませんでした")
 
         Console.spaceLine()
 
