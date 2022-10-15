@@ -36,7 +36,7 @@ Cookie一覧の中にある「FANBOXSESSID」というCookieの値をメモし�
 
 ### 2. releaseにあるJarをダウンロードして使う
 
-GithubのreleaseにJar（ともしかしたらexeも）アップロードしておきますので、ダウンロードして使ってください。Java環境が必要になります。
+Githubのreleaseにjarとexeをアップロードしておきますので、ダウンロードして使ってください。Jarの場合はJava環境が必要になります。Windowsの方はexeをダウンロードすればすぐに使えます。
 
 ## オプション
 
